@@ -6,6 +6,9 @@ import random
 
 pygame.init()
 
+# CLEAN CODE - DESTAQUE
+# bom ter deixado as constantes e configurações todas isoladas aqui em cima. 
+# fica bem mais simples na descrição e fácil de dar manutenção sem ter que caçar os valores no meio do arquivo.
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
@@ -34,7 +37,11 @@ def carregar_ranking():
         try:
             with open(ARQUIVO_RANKING, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except:
+        # CLEAN CODE - MELHORIA
+        # esse except vazio (bare except) é meio perigoso porque engole qualquer erro que der.
+        # o melhor é especificar, tipo: except (FileNotFoundError, json.JSONDecodeError):
+        # assim a gente não camufla outros bugs sem querer.
+        except: 
             return []
     return []
 
@@ -119,6 +126,9 @@ class Player(pygame.sprite.Sprite):
     def shoot_laser(self):
         self.lasers.add(Laser(self.rect.midtop, -8, WHITE))
 
+    # CLEAN CODE - DESTAQUE
+    # a lógica do update ficou bem limpa. as responsabilidades foram quebradas certinho
+    # em funções menores com nomes que já dizem o que fazem (get_input, constraint, recharge).
     def update(self):
         self.get_input()
         self.constraint()
@@ -145,6 +155,10 @@ def tela_menu():
         opt2 = font_medium.render("2. RANKING", True, WHITE)
         opt3 = font_medium.render("3. SAIR", True, RED)
         
+        # CLEAN CODE - MELHORIA
+        # aqui tem uns "números mágicos" soltos (100, 250, 320...). 
+        # o ideal era colocar isso em umas constantes de espaçamento, tipo um MENU_START_Y, 
+        # pra ficar mais claro da onde tão vindo essas posições.
         screen.blit(titulo, (SCREEN_WIDTH//2 - titulo.get_width()//2, 100))
         screen.blit(opt1, (SCREEN_WIDTH//2 - opt1.get_width()//2, 250))
         screen.blit(opt2, (SCREEN_WIDTH//2 - opt2.get_width()//2, 320))
@@ -229,6 +243,11 @@ def tela_inserir_nome(pontos, tempo):
 
 
 # ------------------------ Partida ------------------------
+
+# CLEAN CODE - MELHORIA
+# essa função jogar_partida virou uma "God Function", tá gigante e faz coisa demais ao mesmo tempo.
+# pra refatorar certo e limpar o código, o ideal seria transformar a partida inteira numa classe Game
+# e quebrar o loop principal em métodos menores (tipo um pra checar colisões, outro pra desenhar).
 def jogar_partida():
     player = pygame.sprite.GroupSingle(Player())
     
@@ -266,6 +285,10 @@ def jogar_partida():
     start_ticks = pygame.time.get_ticks()
 
     def alien_setup():
+        # CLEAN CODE - MELHORIA
+        # o uso desse nonlocal aqui mostra que tá faltando encapsulamento na lógica.
+        # se jogar_partida fosse uma classe de verdade, daria pra resolver de boa
+        # usando só um self.alien_direction.
         nonlocal alien_direction
         all_aliens = aliens.sprites()
         for alien in all_aliens:
